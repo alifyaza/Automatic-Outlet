@@ -7,6 +7,7 @@
 #include <WiFi.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
+#include <WiFiManager.h>
 
 #if defined(ESP32)
 PZEM004Tv30 pzem(Serial2, 16, 17);
@@ -23,29 +24,29 @@ PZEM004Tv30 pzem(Serial2);
 SemaphoreHandle_t xSemaphore;
 //TimerHandle_t timeoutTimer;
 TimerHandle_t ntpUpdateTimer;
+WiFiManager wifiManager;
 const int relayPin = 26;
 const int relayPin2 = 27;
 
-float current=0;
-float voltage = 0;
-float power = 0;
-float energy = 0;
-float frequency = 0;
-float pf = 0;
-float prevCurrent = 0;
-bool isOn = false;
-char hours[3]={'0','0','0'};
-char minutes[3]={'0','0','0'};
-int numHours=0;
-int numMinutes=0;
-int offHour=0;
-int offMin=0;
-bool isOnRequested = false;
-unsigned long lastBlynkWriteTime = 0;
+static float current=0;
+static float voltage = 0;
+static float power = 0;
+static float energy = 0;
+static float frequency = 0;
+static float pf = 0;
+static bool isOn = false;
+static char hours[3]={'0','0','0'};
+static char minutes[3]={'0','0','0'};
+static int numHours=0;
+static int numMinutes=0;
+static int offHour=0;
+static int offMin=0;
+static bool isOnRequested = false;
+static unsigned long lastBlynkWriteTime = 0;
 const unsigned long debounceDelay = 1000;
 
-char* ssid = "vivo Y53s";
-char* passwd = "12345678";
+//char* ssid = "vivo Y53s";
+//char* passwd = "12345678";
 const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 3600*7; // GMT offset in seconds (for example, GMT+1 = 3600 seconds)
 const int daylightOffset_sec = 0; // Daylight offset in seconds (for example, DST=1 hour = 3600 seconds)
@@ -74,23 +75,20 @@ BLYNK_WRITE(onOffPin){
 }
 
 BLYNK_WRITE(putHours){
-  if(isOn){
-    offHour=param.asInt();
-    Serial.println("putHours " +offHour);
-    // if(offHour == numHours && offMin == numMinutes){
+  offHour=param.asInt();
+  //Serial.println("putHours " +offHour);
+  //if(offHour == numHours && offMin == numMinutes){
     //   isOn = false;
     // }
-  } 
+   
 }
 
 BLYNK_WRITE(putMin){
-  if(isOn){
-    offMin=param.asInt();
-    //Serial.println("putMin " +offMin);
+  offMin=param.asInt();
+  //Serial.println("putMin " +offMin);
     // if(offHour == numHours && offMin == numMinutes){
     //   isOn = false;
-    // }
-  } 
+    // } 
 }
 
 // void callbackTimer(TimerHandle_t timeoutTimer) {
@@ -146,7 +144,7 @@ void readSensor(void *pvParameters) {
         current = pzem.current();
         power = pzem.power();
         energy = pzem.energy();
-        frequency = pzem.frequency();
+        //frequency = pzem.frequency();
         xSemaphoreGive(xSemaphore);
       }
       Serial.print("readSensor voltage: ");
@@ -209,7 +207,7 @@ void checkWiFi(void *pvParameters) {
  while (1) {
    if (WiFi.status() != WL_CONNECTED) {
      Serial.println("WiFi disconnected. Attempting to reconnect...");
-     WiFi.begin(ssid, passwd);
+     wifiManager.autoConnect("ESP32-AP");
      while (WiFi.status() != WL_CONNECTED) {
        delay(1000);
        Serial.print(".");
@@ -221,15 +219,7 @@ void checkWiFi(void *pvParameters) {
 }
 
 void setupWiFi() {
-  WiFi.begin(ssid, passwd);
-  Serial.println("Connecting to WiFi...");
-
-  int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
-    delay(1000);
-    Serial.print(".");
-    attempts++;
-  }
+  wifiManager.autoConnect("ESP32-AP");
 
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("\nConnected to WiFi");
@@ -242,6 +232,10 @@ void setupWiFi() {
   } else {
     Serial.println("\nFailed to connect to WiFi");
   }
+}
+
+BLYNK_CONNECTED() {
+    Blynk.syncAll();
 }
 
 void setup() {
@@ -259,7 +253,7 @@ void setup() {
 
   xTimerStart(ntpUpdateTimer, 0);
   setupWiFi();
-  Blynk.begin(BLYNK_AUTH_TOKEN,ssid,passwd);
+  Blynk.begin(BLYNK_AUTH_TOKEN, wifiManager.getWiFiSSID(false).c_str(), wifiManager.getWiFiPass(false).c_str());
 
   xTaskCreatePinnedToCore(relayCtr, "for relay", 1024, NULL, 1, NULL, 0);
   xTaskCreatePinnedToCore(sendData, "for print", 4096, NULL, 1, NULL, 1);
@@ -267,6 +261,8 @@ void setup() {
   xTaskCreatePinnedToCore(serialTask, "for input", 1024, NULL, 1, NULL, 0);
   xTaskCreatePinnedToCore(checkWiFi, "for wifi", 4096, NULL, 1, NULL, 0);
   //xTaskCreatePinnedToCore(blynkTask, "for input", 1024, NULL, 0, NULL, 1);
+
+  Blynk.syncVirtual(V0, V1, V4);
 }
 
 void loop() {
