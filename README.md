@@ -54,7 +54,7 @@ SEQUENCE DIAGRAM
 ![sequence diagram](https://github.com/alifyaza/Automatic-Outlet/assets/88533766/a3b53de2-5774-4252-817c-cb2fc87975cc)
 
 STATE DIAGRAM
-![state diagram](https://github.com/alifyaza/Automatic-Outlet/assets/88533766/f3ab231f-df84-4238-9885-2ef57f04e626)
+![state diagram](https://github.com/alifyaza/Automatic-Outlet/assets/88533766/84e95b3e-78f6-4550-ac57-d99322f096b5)
 
 ## v. Test results and performance evaluation
 
