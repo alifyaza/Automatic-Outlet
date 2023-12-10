@@ -44,14 +44,13 @@ Langkah-langkah untuk merangkai rangkaian:
 ....
 
 ## iii. Network Infrastructure
-![network infrastructure](https://github.com/alifyaza/Automatic-Outlet/assets/87703952/f2ee4986-d67d-4063-b01a-cb4884f47557)
 
-.... 
+![network infrastructure](https://github.com/alifyaza/Automatic-Outlet/assets/87703952/f2ee4986-d67d-4063-b01a-cb4884f47557)
 
 ## iv. Software implementation details
 
 Berikut flowchart secara keseluruhan mengenai program yang dibuat:
-![image](...)
+![flowIoT](https://github.com/alifyaza/Automatic-Outlet/assets/87703952/1d9f38ae-c089-4e05-ba42-5484c65e19c6)
 
 
 ## v. Test results and performance evaluation
