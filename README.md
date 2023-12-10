@@ -40,8 +40,6 @@ Socket adalah tempat perangkat listrik terhubung, sementara plug adalah konektor
 ### 5. Adaptor
 Adaptor memberikan daya stabil kepada ESP32 dan komponen lainnya untuk menjaga operasional mikrokontroler.
 
-Langkah-langkah untuk merangkai rangkaian:
-....
 
 ## iii. Network Infrastructure
 
@@ -68,6 +66,8 @@ Performance Evaluation :
 1. Input Responsif
    - Input '1' pada Blynk menghidupkan perangkat (isOn = true).
    - Input '0' pada Blynk mematikan perangkat (isOn = false).
+   - Estimasi waktu respons perangkat dari saat penekanan tombol 'on' melalui interface Blynk hingga relay sepenuhnya teraktivasi adalah antara 1 hingga 2 detik.
+
 
 2. Kontrol Relay
    - Relay berperan sebagai switch daya pada smart outlet.
