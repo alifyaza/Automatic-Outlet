@@ -44,7 +44,7 @@ Langkah-langkah untuk merangkai rangkaian:
 ....
 
 ## iii. Network Infrastructure
-
+![network infrastructure](https://hackmd.io/_uploads/BJ-2KG786.jpg)
 .... 
 
 ## iv. Software implementation details
