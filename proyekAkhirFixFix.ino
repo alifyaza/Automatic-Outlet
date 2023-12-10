@@ -1,6 +1,6 @@
-#define BLYNK_TEMPLATE_ID "TMPL6Z3pkF4mf"
-#define BLYNK_TEMPLATE_NAME "Test"
-#define BLYNK_AUTH_TOKEN "gPoFT9pxs7VIZdtQET7TVl_ORvA2b1Ko"
+#define BLYNK_TEMPLATE_ID "TMPL67H5zBm-Y"
+#define BLYNK_TEMPLATE_NAME "Smart Socket"
+#define BLYNK_AUTH_TOKEN "Wp_qZrDssJklxR_DLmgOimgbzdXNMya-"
 
 #include <BlynkSimpleEsp32.h>
 #include <PZEM004Tv30.h>
@@ -44,6 +44,7 @@ static int offMin=0;
 static bool isOnRequested = false;
 static unsigned long lastBlynkWriteTime = 0;
 const unsigned long debounceDelay = 1000;
+//static int quartMin_counter;
 
 //char* ssid = "vivo Y53s";
 //char* passwd = "12345678";
@@ -54,23 +55,25 @@ WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, ntpServer, gmtOffset_sec, daylightOffset_sec);
 
 BLYNK_WRITE(onOffPin){
+  //Serial.println(param.asInt());
   if(param.asInt()==1){
-    if(!isOn){
-      isOn = true;
-      Serial.println("BLYNK WRITE V0 : device on");
-    }
-    else{
-      Serial.println("BLYNK WRITE V0 : cannot on");
-    }
+    
+    isOn = true;
+    //Serial.println("BLYNK WRITE V0 : device on");
+    digitalWrite(relayPin, LOW);  //matiin relay
+    digitalWrite(relayPin2, LOW);
+    // else{
+    //   //Serial.println("BLYNK WRITE V0 : cannot on");
+    // }
   }
   else{
-    if(isOn){
-      isOn = false;
-      Serial.println("BLYNK WRITE V0 : device off");
-    }
-    else{
-      Serial.println("BLYNK WRITE V0 : cannot off");
-    }
+    isOn = false;
+    //Serial.println("BLYNK WRITE V0 : device off");
+    digitalWrite(relayPin, HIGH);
+    digitalWrite(relayPin2, HIGH);
+    // else{
+    //   Serial.println("BLYNK WRITE V0 : cannot off");
+    // }
   }
 }
 
@@ -99,16 +102,30 @@ BLYNK_WRITE(putMin){
 // }
 
 void updateNTPTime(TimerHandle_t xTimer) {
-  numMinutes++;
-  if(numMinutes == 60){
-    numHours++;
-    numMinutes=0;
-  }
-  if(numHours==24){
-    numHours=0;
-  }
+  
+  timeClient.update();
+  snprintf(hours, sizeof(hours), "%02d", timeClient.getHours());
+  snprintf(minutes, sizeof(minutes), "%02d", timeClient.getMinutes());
+  numHours = String(hours).toInt();
+  numMinutes = String(minutes).toInt();
+
+
   if(offHour == numHours && offMin == numMinutes){
-    isOn = false;
+    Serial.println("check");
+    if(isOn){
+      Serial.println("Dead");
+      digitalWrite(relayPin, HIGH);  //matiin relay
+      digitalWrite(relayPin2, HIGH);
+      isOn = false;
+    }
+    else{
+      Serial.println("Alive");
+      digitalWrite(relayPin, LOW);  //matiin relay
+      digitalWrite(relayPin2, LOW);
+      isOn = true;
+    }
+    offHour = 0;
+    offMin = 0;
   }
   Serial.print(numHours);
   Serial.print(":");
@@ -119,26 +136,9 @@ void updateNTPTime(TimerHandle_t xTimer) {
   Serial.println(offMin);
 }
 
-void relayCtr(void *pvParameters) {
-  while (1) {
-    if (isOn) {
-      //isOn=true;
-      digitalWrite(relayPin, LOW);  //nyalain relay
-      digitalWrite(relayPin2, LOW);
-      Serial.println("relayCtr: device on");
-    } else {
-      //isOn=false;
-      digitalWrite(relayPin, HIGH);
-      digitalWrite(relayPin2, HIGH);
-      Serial.println("relayCtr: device off");
-    }
-    vTaskDelay(pdMS_TO_TICKS(2000));
-  }
-}
-
 void readSensor(void *pvParameters) {
   while (1) {
-    if (isOn) {
+    // if (isOn) {
       if (xSemaphoreTake(xSemaphore, portMAX_DELAY) == pdTRUE) {
         voltage = pzem.voltage();
         current = pzem.current();
@@ -147,8 +147,8 @@ void readSensor(void *pvParameters) {
         //frequency = pzem.frequency();
         xSemaphoreGive(xSemaphore);
       }
-      Serial.print("readSensor voltage: ");
-      Serial.println(voltage);
+      // Serial.print("readSensor voltage: ");
+      // Serial.println(voltage);
       // if (current == 0.00 && prevCurrent!= 0.00) {
       //   xTimerStart(timeoutTimer, 0);
       //   Serial.println("start timer");
@@ -157,9 +157,9 @@ void readSensor(void *pvParameters) {
       //   Serial.println("reset timer");
       // }
       //prevCurrent=current;
-    } else {
-      Serial.println("readSensor:device off");
-    }
+    // } else {
+    //   Serial.println("readSensor:device off");
+    // }
     vTaskDelay(pdMS_TO_TICKS(2000));
   }
 }
@@ -170,49 +170,53 @@ void sendData(void *pvParameters) {
   while (1) {
     if (isOn) {
       if (xSemaphoreTake(xSemaphore, portMAX_DELAY) == pdTRUE) {
-        toSendAV = String(voltage) + "V-" + String(current) + "A , device on";
-        Serial.println(toSendAV);
+        toSendAV = String(voltage) + "V — " + String(current) + "A , device on";
+        //Serial.println(toSendAV);
         Blynk.virtualWrite(displayAV, toSendAV);
-        toSendJW = String(power) + "W-" + String(energy) + "kWh, device on";
-        Serial.println(toSendJW);
+        toSendJW = String(power) + "W — " + String(energy) + "kWh, device on";
+        //Serial.println(toSendJW);
         Blynk.virtualWrite(displayWJ, toSendJW);
         xSemaphoreGive(xSemaphore);
       }
     } else {
-      Serial.println("send data :device off");
-      toSendJW="device off";
-      Blynk.virtualWrite(displayAV, toSendJW);
+      //Serial.println("send data :device off");
+      toSendAV = String(voltage) + "V — --A , device off";
+      toSendJW = "--W — " + String(energy) + "kWh, device off";
+      Blynk.virtualWrite(displayAV, toSendAV);
       Blynk.virtualWrite(displayWJ, toSendJW);
     }
-    vTaskDelay(pdMS_TO_TICKS(2000));
+    vTaskDelay(pdMS_TO_TICKS(5000));
   }
 }
 
-void serialTask(void *parameter) {
-  while (1) {
-    if (Serial.available() > 0) {
-      char inputChar = Serial.read();
-      if (inputChar == '1') {
-        isOn = true;
-      } else if (inputChar == '0') {
-        isOn = false;
-      } 
-      delay(100);  
-    }
-    vTaskDelay(pdMS_TO_TICKS(1000));
-  }
-}
+// void serialTask(void *parameter) {
+//   while (1) {
+//     if (Serial.available() > 0) {
+//       char inputChar = Serial.read();
+//       if (inputChar == '1') {
+//         isOn = true;
+//       } else if (inputChar == '0') {
+//         isOn = false;
+//       } 
+//       delay(100);  
+//     }
+//     vTaskDelay(pdMS_TO_TICKS(1000));
+//   }
+// }
 
 void checkWiFi(void *pvParameters) {
  while (1) {
    if (WiFi.status() != WL_CONNECTED) {
-     Serial.println("WiFi disconnected. Attempting to reconnect...");
-     wifiManager.autoConnect("ESP32-AP");
+     //Serial.println("WiFi disconnected. Attempting to reconnect...");
      while (WiFi.status() != WL_CONNECTED) {
-       delay(1000);
-       Serial.print(".");
+       wifiManager.autoConnect("ESP32-AP");
      }
-     Serial.println("WiFi reconnected.");
+     
+     //Serial.println("WiFi reconnected.");
+     vTaskDelay(3000);
+     Blynk.begin(BLYNK_AUTH_TOKEN, wifiManager.getWiFiSSID(false).c_str(), wifiManager.getWiFiPass(false).c_str());
+     Blynk.syncVirtual(V0, V1, V4);
+     //Serial.println("Blyn synced");
    }
    vTaskDelay(pdMS_TO_TICKS(5000)); // Check every 5 seconds
  }
@@ -222,7 +226,7 @@ void setupWiFi() {
   wifiManager.autoConnect("ESP32-AP");
 
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("\nConnected to WiFi");
+    //Serial.println("\nConnected to WiFi");
     timeClient.begin();
     timeClient.update();
     snprintf(hours, sizeof(hours), "%02d", timeClient.getHours());
@@ -230,42 +234,49 @@ void setupWiFi() {
     numHours = String(hours).toInt();
     numMinutes = String(minutes).toInt();
   } else {
-    Serial.println("\nFailed to connect to WiFi");
+    //Serial.println("\nFailed to connect to WiFi");
   }
-}
-
-BLYNK_CONNECTED() {
-    Blynk.syncAll();
 }
 
 void setup() {
   Serial.begin(115200);
   pinMode(relayPin, OUTPUT);
   pinMode(relayPin2, OUTPUT);
+
+  digitalWrite(relayPin, HIGH);  //matiin relay
+  digitalWrite(relayPin2, HIGH);
+  //isOn = false;
+
+  wifiManager.setConfigPortalTimeout(30);
   
   xSemaphore = xSemaphoreCreateMutex();
-  ntpUpdateTimer = xTimerCreate("timeout", pdMS_TO_TICKS(60000), pdTRUE, (void *)0, updateNTPTime);
+  ntpUpdateTimer = xTimerCreate("timeout", pdMS_TO_TICKS(15000), pdTRUE, (void *)0, updateNTPTime);
   if (ntpUpdateTimer != NULL) {
     xTimerStop(ntpUpdateTimer, 0);
   } else {
-    Serial.println("fail to create timer");
+    //Serial.println("fail to create timer");
   }
 
   xTimerStart(ntpUpdateTimer, 0);
   setupWiFi();
   Blynk.begin(BLYNK_AUTH_TOKEN, wifiManager.getWiFiSSID(false).c_str(), wifiManager.getWiFiPass(false).c_str());
 
-  xTaskCreatePinnedToCore(relayCtr, "for relay", 1024, NULL, 1, NULL, 0);
+  Blynk.syncVirtual(V0, V1, V4);
+  // Serial.print("IsOn=");
+  // Serial.println(isOn);
+
+
+  //xTaskCreatePinnedToCore(relayCtr, "for relay", 1024, NULL, 1, NULL, 0);
   xTaskCreatePinnedToCore(sendData, "for print", 4096, NULL, 1, NULL, 1);
   xTaskCreatePinnedToCore(readSensor, "for sensor", 1024, NULL, 1, NULL, 1);
-  xTaskCreatePinnedToCore(serialTask, "for input", 1024, NULL, 1, NULL, 0);
-  xTaskCreatePinnedToCore(checkWiFi, "for wifi", 4096, NULL, 1, NULL, 0);
+  //xTaskCreatePinnedToCore(serialTask, "for input", 1024, NULL, 1, NULL, 0);
+  xTaskCreatePinnedToCore(checkWiFi, "for wifi", 4096, NULL, 0, NULL, 0);
   //xTaskCreatePinnedToCore(blynkTask, "for input", 1024, NULL, 0, NULL, 1);
 
-  Blynk.syncVirtual(V0, V1, V4);
+  
 }
 
 void loop() {
   Blynk.run();
-  delay(1000);
+  vTaskDelay(1000);
 }
