@@ -52,11 +52,17 @@ Langkah-langkah untuk merangkai rangkaian:
 Berikut flowchart secara keseluruhan mengenai program yang dibuat:
 ![flowIoT](https://github.com/alifyaza/Automatic-Outlet/assets/87703952/1d9f38ae-c089-4e05-ba42-5484c65e19c6)
 
+SEQUENCE DIAGRAM
+![sequence diagram](https://github.com/alifyaza/Automatic-Outlet/assets/88533766/a3b53de2-5774-4252-817c-cb2fc87975cc)
+
+STATE DIAGRAM
+![state diagram](https://github.com/alifyaza/Automatic-Outlet/assets/88533766/f3ab231f-df84-4238-9885-2ef57f04e626)
 
 ## v. Test results and performance evaluation
 
 Test Result :
-...
+![Hasil](https://github.com/alifyaza/Automatic-Outlet/assets/88533766/d32b0ee8-8b7c-4cf7-9375-d39fe71b0783)
+![blynk](https://github.com/alifyaza/Automatic-Outlet/assets/88533766/fc6cfa3d-378a-4c27-9fbb-a9c7eee7e72b)
 
 Performance Evaluation :
 ...
