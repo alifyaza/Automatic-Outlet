@@ -19,7 +19,7 @@ Automatic Outlet adalah solusi inovatif dalam sistem otomatisasi rumah yang mema
 -   [Conclusion and Future Work](#vi-conclusion-and-future-work)
 
 ### Power Point
-[![Link PPT Presentasi](https://img.shields.io/badge/Canva-%2300C4CC.svg?&style=for-the-badge&logo=Canva&logoColor=white)](https://www.canva.com/design/DAF2fdNrTUE/voz4ZAmuR3Yed0McN810dA/edit?utm_content=DAF2fdNrTUE&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+[![Link PPT Presentasi](https://img.shields.io/badge/Canva-%2300C4CC.svg?&style=for-the-badge&logo=Canva&logoColor=white)](https://www.canva.com/design/DAF2XW5AJp8/-UWWxGXYFD5tRD68L9yVOg/edit)
 
 ## i. Introduction to the problem and the solution
 
@@ -65,8 +65,27 @@ Test Result :
 ![blynk](https://github.com/alifyaza/Automatic-Outlet/assets/88533766/fc6cfa3d-378a-4c27-9fbb-a9c7eee7e72b)
 
 Performance Evaluation :
-...
+1. Input Responsif
+   - Input '1' pada Blynk menghidupkan perangkat (isOn = true).
+   - Input '0' pada Blynk mematikan perangkat (isOn = false).
+
+2. Kontrol Relay
+   - Relay berperan sebagai switch daya pada smart outlet.
+   - Pengujian menunjukkan relay dapat menghidupkan (aktif) atau mematikan (non-aktif) smart outlet.
+
+3. Sensor PZEM-004T
+   - Sensor memberikan data yang akurat dan responsif.
+   - Pemantauan sensor hanya aktif saat perangkat dalam keadaan hidup (isOn = true).
+
+4. Pengiriman Data ke Blynk
+   - Data konsumsi daya dan status perangkat terkirim dengan sukses ke server Blynk.
+   - Informasi di aplikasi Blynk sesuai dengan kondisi aktual perangkat.
+
+5. Fungsi Waktu dan NTP
+   - Sinkronisasi waktu dan NTP berjalan dengan baik.
+   - Perangkat dapat dimatikan otomatis sesuai waktu yang diatur pengguna di aplikasi Blynk.
+     
 
 ## vi. Conclusion and Future Work
 
-...
+Proyek "Automatic Outlet" menggunakan mikrokontroler ESP32, relay 2 Channel, dan sensor PZEM-004T untuk memberikan solusi efisien dalam pemantauan dan pengendalian aliran daya listrik ke perangkat elektronik di dalam ruangan. Sistem ini terus-menerus memeriksa konsumsi daya perangkat dan status relay untuk mengatur aliran daya. Relay diaktifkan untuk menyalakan outlet dan dimatikan untuk mematikan perangkat. Sensor PZEM-004T memberikan pemantauan konsumsi daya yang akurat. Dengan antarmuka Blynk, proyek ini memberikan kontrol jarak jauh dan pemantauan waktu nyata, memberikan informasi real-time tentang penggunaan daya perangkat melalui aplikasi Blynk. Meskipun sederhana, integrasi yang baik antara perangkat keras dan perangkat lunak menciptakan solusi yang efisien dan mudah diakses untuk mengelola daya listrik di dalam ruangan.
