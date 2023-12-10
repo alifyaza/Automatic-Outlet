@@ -27,7 +27,7 @@ Automatic Outlet adalah perangkat otomatisasi rumah yang menggunakan platform Bl
 
 ## ii. Hardware design and implementation details
 
-Peralatan yang dibutuhkan untuk merangkai Room Security System :
+Peralatan yang dibutuhkan untuk merangkai Automatic Outlet :
 
 ### 1. ESP32
 ESP32 adalah mikrokontroler WiFi dan Bluetooth untuk mengelola logika pengendalian, berkomunikasi dengan server Blynk, dan mengontrol relay untuk mengatur daya pada socket.
